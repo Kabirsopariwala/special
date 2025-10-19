@@ -13,18 +13,45 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    overflow-x: hidden;
+    align-items: center;
+    flex-direction: column;
   }
+
+  #envelope {
+    width: 150px;
+    height: 100px;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #e63946;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s;
+  }
+
+  #envelope:hover { transform: scale(1.05); }
 
   .container {
     width: 95%;
     max-width: 600px;
     text-align: center;
     padding: 40px 20px;
-    display: flex;
+    display: none; /* hide initially */
     flex-direction: column;
     align-items: center;
-    position: relative;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .container.show {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   h1 {
@@ -51,7 +78,6 @@
     font-size: 1.2em;
     cursor: pointer;
     transition: 0.3s;
-    z-index: 10;
   }
 
   button:hover { background: #ffe3e3; transform: scale(1.05); }
@@ -95,15 +121,22 @@
     transition: opacity 1s;
   }
 
-  /* Smaller screens adjustments */
-  @media (max-width: 480px) {
-    h1 { font-size: 2em; }
-    p { font-size: 1em; line-height: 1.4em; }
-    button { font-size: 1em; padding: 10px 25px; }
+  /* Envelope animation (optional) */
+  #envelope.open {
+    animation: openEnvelope 0.5s forwards;
+  }
+
+  @keyframes openEnvelope {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(-10deg); }
+    100% { transform: scale(0) rotate(-45deg); opacity: 0; }
   }
 </style>
 </head>
 <body>
+
+  <div id="envelope">📩 Open Me</div>
+
 <div class="container">
   <h1>You Matter to Me 💖</h1>
 
@@ -125,8 +158,18 @@ Tumhari halki si muskaan, lamhon ko khaas bana deti hai
 </div>
 
 <script>
+const envelope = document.getElementById('envelope');
+const container = document.querySelector('.container');
 const heartContainer = document.getElementById('heartContainer');
 const thanks = document.getElementById('thanksMsg');
+
+envelope.addEventListener('click', () => {
+  envelope.classList.add('open'); // envelope open animation
+  setTimeout(() => {
+    envelope.style.display = 'none';
+    container.classList.add('show'); // fade-in slide-up messages
+  }, 500); // wait until envelope animation finishes
+});
 
 function createHeart() {
   heartContainer.innerHTML = '';
@@ -134,17 +177,15 @@ function createHeart() {
 
   const points = [];
   const containerWidth = heartContainer.clientWidth;
-  const scale = containerWidth / 32; // scale based on container width
+  const scale = containerWidth / 32;
   const offset = containerWidth / 2;
 
-  // parametric heart equation for proper rounded heart
   for (let t = 0; t < Math.PI * 2; t += 0.05) {
     const x = 16 * Math.pow(Math.sin(t), 3);
     const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
     points.push({ x: x * scale + offset, y: y * scale + offset });
   }
 
-  // Animate each heart dot slowly
   points.forEach((pt, i) => {
     setTimeout(() => {
       const heart = document.createElement('div');
@@ -153,12 +194,12 @@ function createHeart() {
       heart.style.top = pt.y + 'px';
       heartContainer.appendChild(heart);
       heart.style.opacity = 1;
-    }, i * 50); // slow animation
+    }, i * 50);
   });
 
-  // Show thanks message after hearts appear
   setTimeout(() => { thanks.style.opacity = 1; }, points.length * 50 + 300);
 }
 </script>
+
 </body>
 </html>
